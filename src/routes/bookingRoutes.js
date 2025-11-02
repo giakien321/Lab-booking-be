@@ -1,4 +1,10 @@
 import express from "express";
+import {
+  getBookings,
+  createBooking,
+  updateBooking,
+  deleteBooking,
+} from "../controllers/bookingController.js";
 
 const router = express.Router();
 
@@ -90,4 +96,8 @@ const router = express.Router();
  *           example: "8:00 - 10:00"
  */
 
+router.get("/", getBookings);
+router.post("/", createBooking);
+router.put("/:id", updateBooking);
+router.delete("/:id", deleteBooking);
 export default router;

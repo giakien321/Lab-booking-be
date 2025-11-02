@@ -1,4 +1,10 @@
 import express from "express";
+import {
+  getLabs,
+  createLab,
+  updateLab,
+  deleteLab,
+} from "../controllers/labController.js";
 
 const router = express.Router();
 
@@ -84,5 +90,10 @@ const router = express.Router();
  *           type: number
  *           example: 40
  */
+
+router.get("/", getLabs);
+router.post("/", createLab);
+router.put("/:id", updateLab);
+router.delete("/:id", deleteLab);
 
 export default router;
