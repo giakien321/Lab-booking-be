@@ -1,4 +1,4 @@
-import Lab from "../models/labModel";
+import Lab from "../models/labModel.js";
 
 export const getLabs = async (req,res) =>{
     try {
