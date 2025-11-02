@@ -10,13 +10,26 @@ const router = express.Router();
 
 /**
  * @swagger
- * /students:
+ * tags:
+ *   name: Students
+ *   description: Quản lý sinh viên trong hệ thống FPT Lab Booking
+ */
+
+/**
+ * @swagger
+ * /api/v1/students:
  *   get:
  *     summary: Lấy danh sách sinh viên
  *     tags: [Students]
  *     responses:
  *       200:
  *         description: Danh sách sinh viên
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Student'
  *   post:
  *     summary: Thêm sinh viên mới
  *     tags: [Students]
@@ -33,7 +46,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /students/{id}:
+ * /api/v1/students/{id}:
  *   put:
  *     summary: Cập nhật thông tin sinh viên
  *     tags: [Students]
@@ -41,6 +54,7 @@ const router = express.Router();
  *       - in: path
  *         name: id
  *         required: true
+ *         description: ID của sinh viên cần cập nhật
  *         schema:
  *           type: string
  *     requestBody:
@@ -51,7 +65,7 @@ const router = express.Router();
  *             $ref: '#/components/schemas/Student'
  *     responses:
  *       200:
- *         description: Cập nhật thành công
+ *         description: Cập nhật sinh viên thành công
  *   delete:
  *     summary: Xóa sinh viên
  *     tags: [Students]
@@ -59,11 +73,12 @@ const router = express.Router();
  *       - in: path
  *         name: id
  *         required: true
+ *         description: ID của sinh viên cần xóa
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Xóa thành công
+ *         description: Xóa sinh viên thành công
  */
 
 /**
@@ -78,14 +93,25 @@ const router = express.Router();
  *         - major
  *         - email
  *       properties:
+ *         _id:
+ *           type: string
+ *           description: ID của sinh viên (tự động sinh bởi MongoDB)
  *         name:
  *           type: string
+ *           description: Họ tên sinh viên
+ *           example: Nguyen Van A
  *         age:
  *           type: number
+ *           description: Tuổi sinh viên
+ *           example: 21
  *         major:
  *           type: string
+ *           description: Chuyên ngành
+ *           example: Software Engineering
  *         email:
  *           type: string
+ *           description: Email sinh viên FPT
+ *           example: nva@fpt.edu.vn
  */
 
 router.get("/", getStudents);
