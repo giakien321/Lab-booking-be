@@ -9,7 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Swagger setup
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
@@ -19,17 +18,27 @@ const swaggerOptions = {
       description: "RESTful API documentation for FPT Lab Booking system",
     },
     servers: [
-      { url: "https://fpt-lab-booking-be.onrender.com/api/v1" }, // URL sau khi deploy
-      { url: "http://localhost:5000/api/v1" }, // URL khi chạy local
+      {
+        url: "https://lab-booking-be-1.onrender.com", 
+        description: "Deployed server (Render)"
+      },
+      {
+        url: "http://localhost:5000",
+        description: "Local development server"
+      }
     ],
   },
-  apis: ["./src/routes/*.js"],
+  apis: ["./routes/*.js"],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
 app.use("/swagger-ui", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Routes
 app.use("/api/v1/students", studentRoutes);
+
+app.get("/", (req, res) => {
+  res.redirect("/swagger-ui");
+});
 
 export default app;
