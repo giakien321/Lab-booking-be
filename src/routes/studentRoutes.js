@@ -12,26 +12,20 @@ const router = express.Router();
  * @swagger
  * tags:
  *   name: Students
- *   description: Quản lý sinh viên trong hệ thống FPT Lab Booking
+ *   description: Manage student information
  */
 
 /**
  * @swagger
  * /api/v1/students:
  *   get:
- *     summary: Lấy danh sách sinh viên
+ *     summary: Get all students
  *     tags: [Students]
  *     responses:
  *       200:
- *         description: Danh sách sinh viên
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Student'
+ *         description: Successfully retrieved the list of students
  *   post:
- *     summary: Thêm sinh viên mới
+ *     summary: Create a new student
  *     tags: [Students]
  *     requestBody:
  *       required: true
@@ -41,20 +35,17 @@ const router = express.Router();
  *             $ref: '#/components/schemas/Student'
  *     responses:
  *       201:
- *         description: Sinh viên được tạo thành công
- */
-
-/**
- * @swagger
+ *         description: Student created successfully
+ *
  * /api/v1/students/{id}:
  *   put:
- *     summary: Cập nhật thông tin sinh viên
+ *     summary: Update student information
  *     tags: [Students]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của sinh viên cần cập nhật
+ *         description: Student ID
  *         schema:
  *           type: string
  *     requestBody:
@@ -65,20 +56,20 @@ const router = express.Router();
  *             $ref: '#/components/schemas/Student'
  *     responses:
  *       200:
- *         description: Cập nhật sinh viên thành công
+ *         description: Student updated successfully
  *   delete:
- *     summary: Xóa sinh viên
+ *     summary: Delete a student
  *     tags: [Students]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: ID của sinh viên cần xóa
+ *         description: Student ID
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Xóa sinh viên thành công
+ *         description: Student deleted successfully
  */
 
 /**
@@ -89,29 +80,25 @@ const router = express.Router();
  *       type: object
  *       required:
  *         - name
- *         - age
- *         - major
  *         - email
+ *         - major
+ *         - age
  *       properties:
  *         _id:
  *           type: string
- *           description: ID của sinh viên (tự động sinh bởi MongoDB)
+ *           description: Automatically generated student ID
  *         name:
  *           type: string
- *           description: Họ tên sinh viên
- *           example: Nguyen Van A
- *         age:
- *           type: number
- *           description: Tuổi sinh viên
- *           example: 21
- *         major:
- *           type: string
- *           description: Chuyên ngành
- *           example: Software Engineering
+ *           example: John Doe
  *         email:
  *           type: string
- *           description: Email sinh viên FPT
- *           example: nva@fpt.edu.vn
+ *           example: john.doe@fpt.edu.vn
+ *         major:
+ *           type: string
+ *           example: Software Engineering
+ *         age:
+ *           type: number
+ *           example: 21
  */
 
 router.get("/", getStudents);

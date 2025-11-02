@@ -2,7 +2,10 @@ import express from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
+
 import studentRoutes from "./routes/studentRoutes.js";
+import labRoutes from "./routes/labRoutes.js";
+import bookingRoutes from "./routes/bookingRoutes.js";
 
 const app = express();
 
@@ -18,24 +21,21 @@ const swaggerOptions = {
       description: "RESTful API documentation for FPT Lab Booking system",
     },
     servers: [
-      {
-        url: "https://lab-booking-be-1.onrender.com", 
-        description: "Deployed server (Render)"
-      },
-      {
-        url: "http://localhost:5000",
-        description: "Local development server"
-      }
+      { url: "https://lab-booking-be-1.onrender.com", description: "Deployed server" },
+      { url: "http://localhost:5000", description: "Local development server" },
     ],
   },
-  apis: ["./routes/*.js"],
+  apis: ["./src/routes/*.js"],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-
 app.use("/swagger-ui", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+
 app.use("/api/v1/students", studentRoutes);
+app.use("/api/v1/labs", labRoutes);
+app.use("/api/v1/bookings", bookingRoutes);
+
 
 app.get("/", (req, res) => {
   res.redirect("/swagger-ui");
