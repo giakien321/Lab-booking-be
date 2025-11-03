@@ -34,9 +34,10 @@ const router = express.Router();
  *     responses:
  *       201:
  *         description: Booking created successfully
+ *
  *   get:
  *     summary: Get bookings
- *     description: Admin → all bookings, Student → own bookings
+ *     description: Admin → All bookings | Student → Own bookings
  *     tags: [Bookings]
  *     security:
  *       - bearerAuth: []
@@ -46,7 +47,7 @@ const router = express.Router();
  *
  * /api/v1/bookings/{id}/status:
  *   patch:
- *     summary: Update booking status (Admin)
+ *     summary: Update booking status (Admin only)
  *     tags: [Bookings]
  *     security:
  *       - bearerAuth: []
@@ -56,6 +57,7 @@ const router = express.Router();
  *         required: true
  *         schema:
  *           type: string
+ *         description: Booking ID
  *     requestBody:
  *       required: true
  *       content:
@@ -82,6 +84,7 @@ const router = express.Router();
  *         required: true
  *         schema:
  *           type: string
+ *         description: Booking ID
  *     responses:
  *       200:
  *         description: Booking cancelled successfully
@@ -102,6 +105,7 @@ const router = express.Router();
  *       properties:
  *         lab:
  *           type: string
+ *           description: ID of the lab to book
  *           example: "654abc123456"
  *         subjectCode:
  *           type: string
@@ -118,10 +122,12 @@ const router = express.Router();
  */
 
 router.post("/", verifyToken, createBooking);
+
 router.get("/", verifyToken, (req, res, next) => {
   if (req.user.role === "admin") return getAllBookings(req, res, next);
   return getMyBookings(req, res, next);
 });
+
 router.patch("/:id/status", verifyToken, verifyAdmin, updateBookingStatus);
 router.delete("/:id", verifyToken, cancelBooking);
 
