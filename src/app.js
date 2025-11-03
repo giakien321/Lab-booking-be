@@ -28,15 +28,18 @@ const swaggerOptions = {
       description: "RESTful API documentation for FPT Lab Booking system",
     },
     servers: [
-      {
-        url: "https://lab-booking-be-1.onrender.com",
-        description: "Deployed server",
-      },
-      {
-        url: "http://localhost:5000",
-        description: "Local development server",
-      },
+      { url: "https://lab-booking-be-1.onrender.com" },
+      { url: "http://localhost:5000" },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
   },
   apis: ["./src/routes/*.js"],
 };

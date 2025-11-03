@@ -1,29 +1,18 @@
 import mongoose from "mongoose";
 
-const boookingSchema = new mongoose.Schema(
+const bookingSchema = new mongoose.Schema(
     {
-        studentId:{
-            type: mongoose.Schema.Types.ObjectId,
-            ref:"Student",
-            required:true,
-        },
-        labId:{
-            type: mongoose.Schema.Types.ObjectId,
-            ref:"Lab",
-            required:true,
-        },
-        date:{
+        student: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        lab: { type: mongoose.Schema.Types.ObjectId, ref: "Lab", required: true },
+        date: { type: String, required: true },
+        timeSlot: { type: String, required: true },
+        status: {
             type: String,
-            required: true,
-        },
-        timeSlot:{
-            type: String,
-            required: true,
+            enum: ["pending", "approved", "rejected", "cancelled"],
+            default: "pending",
         },
     },
-    {timestamps:true}
+    { timestamps: true }
 );
 
-const Booking = mongoose.model("Booking", boookingSchema);
-
-export default Booking;
+export default mongoose.model("Booking", bookingSchema);

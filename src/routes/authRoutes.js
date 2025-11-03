@@ -7,14 +7,14 @@ const router = express.Router();
  * @swagger
  * tags:
  *   name: Auth
- *   description: Google OAuth2 Login and Token Management
+ *   description: Google OAuth2 login and JWT token management
  */
 
 /**
  * @swagger
  * /api/v1/auth/google:
  *   post:
- *     summary: Login with Google token
+ *     summary: Login using Google ID Token
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -25,18 +25,16 @@ const router = express.Router();
  *             properties:
  *               token:
  *                 type: string
- *                 description: Google ID Token
+ *                 description: Google ID Token from client
  *     responses:
  *       200:
- *         description: Login successful
- */
-router.post("/google", googleLogin);
-
-/**
- * @swagger
+ *         description: Successfully authenticated with Google
+ *       400:
+ *         description: Invalid or expired Google token
+ *
  * /api/v1/auth/refresh:
  *   post:
- *     summary: Refresh JWT token
+ *     summary: Refresh access token
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -47,10 +45,13 @@ router.post("/google", googleLogin);
  *             properties:
  *               token:
  *                 type: string
+ *                 description: Refresh token
  *     responses:
  *       200:
- *         description: New tokens returned
+ *         description: Returns a new access token
  */
+
+router.post("/google", googleLogin);
 router.post("/refresh", refreshToken);
 
 export default router;

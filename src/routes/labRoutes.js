@@ -5,6 +5,7 @@ import {
   updateLab,
   deleteLab,
 } from "../controllers/labController.js";
+import { verifyToken, verifyAdmin } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -21,12 +22,16 @@ const router = express.Router();
  *   get:
  *     summary: Get all labs
  *     tags: [Labs]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of labs
  *   post:
  *     summary: Create a new lab
  *     tags: [Labs]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -41,11 +46,12 @@ const router = express.Router();
  *   put:
  *     summary: Update lab information
  *     tags: [Labs]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: Lab ID
  *         schema:
  *           type: string
  *     responses:
@@ -54,11 +60,12 @@ const router = express.Router();
  *   delete:
  *     summary: Delete a lab
  *     tags: [Labs]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: Lab ID
  *         schema:
  *           type: string
  *     responses:
@@ -79,7 +86,6 @@ const router = express.Router();
  *       properties:
  *         _id:
  *           type: string
- *           description: Automatically generated lab ID
  *         name:
  *           type: string
  *           example: Lab A101
@@ -91,9 +97,9 @@ const router = express.Router();
  *           example: 40
  */
 
-router.get("/", getLabs);
-router.post("/", createLab);
-router.put("/:id", updateLab);
-router.delete("/:id", deleteLab);
+router.get("/", verifyToken, getLabs);
+router.post("/", verifyToken, verifyAdmin, createLab);
+router.put("/:id", verifyToken, verifyAdmin, updateLab);
+router.delete("/:id", verifyToken, verifyAdmin, deleteLab);
 
 export default router;
