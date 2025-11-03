@@ -1,54 +1,24 @@
 import Booking from "../models/bookingModel.js";
 import Lab from "../models/labModel.js";
 
-/**
- * Get all bookings (admin) or user's own bookings (student)
- */
-export const getBookings = async (req, res) => {
-  try {
-    let bookings;
-    if (req.user.role === "admin") {
-      bookings = await Booking.find()
-        .populate("user", "name email role")
-        .populate("lab", "name location")
-        .sort({ createdAt: -1 });
-    } else {
-      bookings = await Booking.find({ user: req.user.id })
-        .populate("lab", "name location")
-        .sort({ date: -1 });
-    }
-    res.status(200).json(bookings);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to fetch bookings", error });
-  }
-};
-
-/**
- * Create booking (student)
- */
+// Student: create a booking
 export const createBooking = async (req, res) => {
   try {
-    const { labId, subjectCode, date, startTime, endTime } = req.body;
+    const { lab, subjectCode, date, startTime, endTime } = req.body;
 
-    if (!labId || !date || !startTime || !endTime) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
-    // Optional: verify lab exists
-    const lab = await Lab.findById(labId);
-    if (!lab) {
+    // check if lab exists
+    const labExist = await Lab.findById(lab);
+    if (!labExist) {
       return res.status(404).json({ message: "Lab not found" });
     }
 
     const booking = await Booking.create({
       user: req.user.id,
-      lab: labId,
+      lab,
       subjectCode,
       date,
       startTime,
       endTime,
-      status: "pending",
     });
 
     res.status(201).json({
@@ -56,68 +26,75 @@ export const createBooking = async (req, res) => {
       booking,
     });
   } catch (error) {
-    console.error(error);
-    res.status(400).json({ message: "Booking failed", error });
+    res.status(400).json({ message: "Booking failed", error: error.message });
   }
 };
 
-/**
- * Approve booking (admin)
- */
-export const approveBooking = async (req, res) => {
+// Student: view own bookings
+export const getMyBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({ user: req.user.id })
+      .populate("lab", "name location")
+      .sort({ date: -1 });
+    res.status(200).json({
+      message: "Fetched user's bookings successfully",
+      total: bookings.length,
+      bookings,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch bookings", error: error.message });
+  }
+};
+
+// Admin: view all bookings
+export const getAllBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate("user", "name email role")
+      .populate("lab", "name location")
+      .sort({ createdAt: -1 });
+    res.status(200).json({
+      message: "Fetched all bookings successfully",
+      total: bookings.length,
+      bookings,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch all bookings", error: error.message });
+  }
+};
+
+// Admin: approve or reject booking
+export const updateBookingStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const booking = await Booking.findByIdAndUpdate(
-      id,
-      { status: "approved" },
-      { new: true }
-    );
-    if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
+    const { status } = req.body;
+
+    if (!["approved", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
     }
-    res.status(200).json({ message: "Booking approved", booking });
+
+    const booking = await Booking.findByIdAndUpdate(id, { status }, { new: true });
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    res.status(200).json({
+      message: `Booking ${status} successfully`,
+      booking,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to approve booking", error });
+    res.status(500).json({ message: "Failed to update booking", error: error.message });
   }
 };
 
-/**
- * Reject booking (admin)
- */
-export const rejectBooking = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const booking = await Booking.findByIdAndUpdate(
-      id,
-      { status: "rejected" },
-      { new: true }
-    );
-    if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
-    res.status(200).json({ message: "Booking rejected", booking });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to reject booking", error });
-  }
-};
-
-/**
- * Cancel booking (student or admin)
- */
+// Cancel a booking (student or admin)
 export const cancelBooking = async (req, res) => {
   try {
     const { id } = req.params;
+
     const booking = await Booking.findById(id);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
-
-    // Only the creator or admin can cancel
-    if (
-      req.user.role !== "admin" &&
-      booking.user.toString() !== req.user.id
-    ) {
+    // student can only cancel their own booking
+    if (req.user.role !== "admin" && booking.user.toString() !== req.user.id) {
       return res.status(403).json({ message: "Not authorized to cancel this booking" });
     }
 
@@ -126,6 +103,6 @@ export const cancelBooking = async (req, res) => {
 
     res.status(200).json({ message: "Booking cancelled successfully", booking });
   } catch (error) {
-    res.status(500).json({ message: "Failed to cancel booking", error });
+    res.status(500).json({ message: "Failed to cancel booking", error: error.message });
   }
 };
