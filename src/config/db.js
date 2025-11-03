@@ -10,10 +10,7 @@ const connectDB = async () => {
             throw new Error("Missing MONGO_URI in .env");
         }
 
-        await mongoose.connect(uri, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        await mongoose.connect(uri);
 
         console.log("✅ MongoDB connected successfully");
     } catch (error) {
