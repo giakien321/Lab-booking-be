@@ -2,15 +2,11 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
     {
-        googleId: { type: String, required: true, unique: true },
+        googleId: { type: String, required: true },
         name: { type: String, required: true },
         email: { type: String, required: true, unique: true },
         picture: { type: String },
-        role: {
-            type: String,
-            enum: ["student", "admin"],
-            default: "student",
-        },
+        role: { type: String, enum: ["student", "admin"], default: "student" },
     },
     { timestamps: true }
 );
