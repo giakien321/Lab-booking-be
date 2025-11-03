@@ -4,6 +4,12 @@ import User from "../models/userModel.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+const validAudiences = [
+    process.env.GOOGLE_CLIENT_ID, 
+    "407408718192.apps.googleusercontent.com" 
+];
+
+// Generate access and refresh tokens
 const generateTokens = (user) => {
     const payload = { id: user._id, email: user.email, role: user.role };
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -11,39 +17,61 @@ const generateTokens = (user) => {
     return { accessToken, refreshToken };
 };
 
+// Google Login Controller
 export const googleLogin = async (req, res) => {
     try {
         const { token } = req.body;
+
         const ticket = await client.verifyIdToken({
             idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID,
+            audience: validAudiences,
         });
-        const { sub, name, email, picture } = ticket.getPayload();
+
+        const { sub, name, email, picture, hd } = ticket.getPayload();
 
         let user = await User.findOne({ email });
+
         if (!user) {
+            // Assign role automatically based on domain
             const role = email.includes("fpt.edu.vn") ? "student" : "admin";
-            user = await User.create({ googleId: sub, name, email, picture, role });
+
+            user = await User.create({
+                googleId: sub,
+                name,
+                email,
+                picture,
+                role,
+            });
         }
 
         const { accessToken, refreshToken } = generateTokens(user);
-        res.status(200).json({ message: "Login successful", user, accessToken, refreshToken });
+
+        res.status(200).json({
+            message: "Login successful",
+            user,
+            accessToken,
+            refreshToken,
+        });
     } catch (error) {
-        res.status(400).json({ message: "Google login failed", error });
+        console.error("Google login failed:", error);
+        res.status(400).json({ message: "Google login failed", error: error.message });
     }
 };
 
+// Refresh token
 export const refreshToken = (req, res) => {
     const { token } = req.body;
     if (!token) return res.status(401).json({ message: "Missing refresh token" });
 
     jwt.verify(token, process.env.JWT_REFRESH_SECRET, (err, user) => {
         if (err) return res.status(403).json({ message: "Invalid refresh token" });
+
         const accessToken = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
         );
+
         res.status(200).json({ accessToken });
     });
 };
