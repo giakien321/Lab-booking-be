@@ -1,8 +1,7 @@
 import jwt from "jsonwebtoken";
-import pkg from "google-auth-library";
+import { OAuth2Client } from "google-auth-library";
 import User from "../models/userModel.js";
 
-const { OAuth2Client } = pkg;
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Generate access and refresh tokens
