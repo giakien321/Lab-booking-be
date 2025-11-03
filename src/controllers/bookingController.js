@@ -1,14 +1,16 @@
 import Booking from "../models/bookingModel.js";
 import Lab from "../models/labModel.js";
 
-// Student: create a booking
+/**
+ * Student: Create a new booking
+ */
 export const createBooking = async (req, res) => {
   try {
     const { lab, subjectCode, date, startTime, endTime } = req.body;
 
-    // check if lab exists
-    const labExist = await Lab.findById(lab);
-    if (!labExist) {
+    // Check if lab exists
+    const labExists = await Lab.findById(lab);
+    if (!labExists) {
       return res.status(404).json({ message: "Lab not found" });
     }
 
@@ -19,6 +21,7 @@ export const createBooking = async (req, res) => {
       date,
       startTime,
       endTime,
+      status: "pending",
     });
 
     res.status(201).json({
@@ -26,83 +29,124 @@ export const createBooking = async (req, res) => {
       booking,
     });
   } catch (error) {
-    res.status(400).json({ message: "Booking failed", error: error.message });
+    res.status(400).json({
+      message: "Failed to create booking",
+      error: error.message,
+    });
   }
 };
 
-// Student: view own bookings
+/**
+ *  Student: Get own bookings
+ */
 export const getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user.id })
       .populate("lab", "name location")
       .sort({ date: -1 });
+
     res.status(200).json({
-      message: "Fetched user's bookings successfully",
-      total: bookings.length,
+      count: bookings.length,
       bookings,
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch bookings", error: error.message });
+    res.status(500).json({
+      message: "Failed to fetch user bookings",
+      error: error.message,
+    });
   }
 };
 
-// Admin: view all bookings
+/**
+ *  Admin: Get all bookings
+ */
 export const getAllBookings = async (req, res) => {
   try {
     const bookings = await Booking.find()
-      .populate("user", "name email role")
+      .populate("user", "name email")
       .populate("lab", "name location")
       .sort({ createdAt: -1 });
+
     res.status(200).json({
-      message: "Fetched all bookings successfully",
       total: bookings.length,
       bookings,
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch all bookings", error: error.message });
+    res.status(500).json({
+      message: "Failed to fetch all bookings",
+      error: error.message,
+    });
   }
 };
 
-// Admin: approve or reject booking
+/**
+ *  Admin: Approve or reject a booking
+ */
 export const updateBookingStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
     if (!["approved", "rejected"].includes(status)) {
-      return res.status(400).json({ message: "Invalid status" });
+      return res.status(400).json({ message: "Invalid booking status" });
     }
 
-    const booking = await Booking.findByIdAndUpdate(id, { status }, { new: true });
-    if (!booking) return res.status(404).json({ message: "Booking not found" });
+    const booking = await Booking.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    )
+      .populate("user", "name email")
+      .populate("lab", "name location");
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
 
     res.status(200).json({
       message: `Booking ${status} successfully`,
       booking,
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to update booking", error: error.message });
+    res.status(500).json({
+      message: "Failed to update booking status",
+      error: error.message,
+    });
   }
 };
 
-// Cancel a booking (student or admin)
+/**
+ *  Student or Admin: Cancel booking
+ */
 export const cancelBooking = async (req, res) => {
   try {
     const { id } = req.params;
 
     const booking = await Booking.findById(id);
-    if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    // student can only cancel their own booking
-    if (req.user.role !== "admin" && booking.user.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not authorized to cancel this booking" });
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // Only the owner or admin can cancel
+    if (
+      booking.user.toString() !== req.user.id &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({ message: "Access denied" });
     }
 
     booking.status = "cancelled";
     await booking.save();
 
-    res.status(200).json({ message: "Booking cancelled successfully", booking });
+    res.status(200).json({
+      message: "Booking cancelled successfully",
+      booking,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to cancel booking", error: error.message });
+    res.status(500).json({
+      message: "Failed to cancel booking",
+      error: error.message,
+    });
   }
 };

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getLabs,
+  getLabById,
   createLab,
   updateLab,
   deleteLab,
@@ -27,8 +28,9 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of labs
+ *
  *   post:
- *     summary: Create a new lab
+ *     summary: Create a new lab (Admin only)
  *     tags: [Labs]
  *     security:
  *       - bearerAuth: []
@@ -43,8 +45,24 @@ const router = express.Router();
  *         description: Lab created successfully
  *
  * /api/v1/labs/{id}:
+ *   get:
+ *     summary: Get lab by ID
+ *     tags: [Labs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Lab ID
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved lab
+ *
  *   put:
- *     summary: Update lab information
+ *     summary: Update lab information (Admin only)
  *     tags: [Labs]
  *     security:
  *       - bearerAuth: []
@@ -57,8 +75,9 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: Lab updated successfully
+ *
  *   delete:
- *     summary: Delete a lab
+ *     summary: Delete a lab (Admin only)
  *     tags: [Labs]
  *     security:
  *       - bearerAuth: []
@@ -98,6 +117,7 @@ const router = express.Router();
  */
 
 router.get("/", verifyToken, getLabs);
+router.get("/:id", verifyToken, getLabById); // 👈 thêm mới để GET theo ID
 router.post("/", verifyToken, verifyAdmin, createLab);
 router.put("/:id", verifyToken, verifyAdmin, updateLab);
 router.delete("/:id", verifyToken, verifyAdmin, deleteLab);
