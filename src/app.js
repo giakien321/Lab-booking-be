@@ -7,6 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import labRoutes from "./routes/labRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 import { verifyToken } from "./middlewares/authMiddleware.js";
 
 const app = express();
@@ -37,6 +38,7 @@ app.use("/swagger-ui", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/labs", verifyToken, labRoutes);
 app.use("/api/v1/bookings", verifyToken, bookingRoutes);
 
