@@ -2,9 +2,11 @@ import express from "express";
 import {
   getBookings,
   createBooking,
-  updateBooking,
-  deleteBooking,
+  approveBooking,
+  rejectBooking,
+  cancelBooking,
 } from "../controllers/bookingController.js";
+import { verifyToken, verifyAdmin } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -12,21 +14,25 @@ const router = express.Router();
  * @swagger
  * tags:
  *   name: Bookings
- *   description: Manage lab room booking schedules
+ *   description: Manage lab booking requests
  */
 
 /**
  * @swagger
  * /api/v1/bookings:
  *   get:
- *     summary: Get all bookings
+ *     summary: Get all bookings (admin) or your own (student)
  *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Successfully retrieved the list of bookings
+ *         description: Successfully retrieved bookings
  *   post:
  *     summary: Create a new booking
  *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -37,33 +43,53 @@ const router = express.Router();
  *       201:
  *         description: Booking created successfully
  *
- * /api/v1/bookings/{id}:
+ * /api/v1/bookings/{id}/approve:
  *   put:
- *     summary: Update booking details
+ *     summary: Approve a booking request
  *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: Booking ID
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Booking updated successfully
+ *         description: Booking approved
+ *
+ * /api/v1/bookings/{id}/reject:
+ *   put:
+ *     summary: Reject a booking request
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Booking rejected
+ *
+ * /api/v1/bookings/{id}:
  *   delete:
- *     summary: Cancel a booking
+ *     summary: Cancel a booking (student or admin)
  *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: Booking ID
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Booking deleted successfully
+ *         description: Booking cancelled successfully
  */
 
 /**
@@ -73,31 +99,30 @@ const router = express.Router();
  *     Booking:
  *       type: object
  *       required:
- *         - studentId
  *         - labId
  *         - date
  *         - timeSlot
  *       properties:
  *         _id:
  *           type: string
- *           description: Automatically generated booking ID
- *         studentId:
- *           type: string
- *           example: 67292a2f812ab74a2b9a
  *         labId:
  *           type: string
- *           example: 67293baf812ab74a2b9b
+ *           description: ID of the lab to book
  *         date:
  *           type: string
- *           format: date
- *           example: 2025-11-03
+ *           example: "2025-11-05"
  *         timeSlot:
  *           type: string
- *           example: "8:00 - 10:00"
+ *           example: "09:00 - 11:00"
+ *         status:
+ *           type: string
+ *           enum: [pending, approved, rejected, cancelled]
  */
 
-router.get("/", getBookings);
-router.post("/", createBooking);
-router.put("/:id", updateBooking);
-router.delete("/:id", deleteBooking);
+router.get("/", verifyToken, getBookings);
+router.post("/", verifyToken, createBooking);
+router.put("/:id/approve", verifyToken, verifyAdmin, approveBooking);
+router.put("/:id/reject", verifyToken, verifyAdmin, rejectBooking);
+router.delete("/:id", verifyToken, cancelBooking);
+
 export default router;
