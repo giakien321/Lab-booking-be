@@ -45,7 +45,7 @@ const router = express.Router();
  *
  * /api/v1/bookings/{id}/approve:
  *   put:
- *     summary: Approve a booking request
+ *     summary: Approve a booking request (admin)
  *     tags: [Bookings]
  *     security:
  *       - bearerAuth: []
@@ -61,7 +61,7 @@ const router = express.Router();
  *
  * /api/v1/bookings/{id}/reject:
  *   put:
- *     summary: Reject a booking request
+ *     summary: Reject a booking request (admin)
  *     tags: [Bookings]
  *     security:
  *       - bearerAuth: []
@@ -101,19 +101,26 @@ const router = express.Router();
  *       required:
  *         - labId
  *         - date
- *         - timeSlot
+ *         - startTime
+ *         - endTime
  *       properties:
  *         _id:
  *           type: string
  *         labId:
  *           type: string
  *           description: ID of the lab to book
+ *         subjectCode:
+ *           type: string
+ *           example: "PRJ301"
  *         date:
  *           type: string
  *           example: "2025-11-05"
- *         timeSlot:
+ *         startTime:
  *           type: string
- *           example: "09:00 - 11:00"
+ *           example: "09:00"
+ *         endTime:
+ *           type: string
+ *           example: "11:00"
  *         status:
  *           type: string
  *           enum: [pending, approved, rejected, cancelled]

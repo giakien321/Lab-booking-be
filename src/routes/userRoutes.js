@@ -22,6 +22,10 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: Returns user profile info
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  *
  * /api/v1/users:
  *   get:
@@ -32,6 +36,12 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: Successfully retrieved user list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
  *
  * /api/v1/users/{id}/role:
  *   patch:
@@ -61,8 +71,33 @@ const router = express.Router();
  *         description: User role updated successfully
  */
 
-router.get("/me", verifyToken, getMe);
-router.get("/", verifyToken, verifyAdmin, getUsers);
-router.patch("/:id/role", verifyToken, verifyAdmin, updateUserRole);
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Auto-generated user ID
+ *         name:
+ *           type: string
+ *           example: "Nguyen Van A"
+ *         email:
+ *           type: string
+ *           example: "a@fpt.edu.vn"
+ *         role:
+ *           type: string
+ *           enum: [student, admin]
+ *           example: "student"
+ *         picture:
+ *           type: string
+ *           example: "https://example.com/avatar.jpg"
+ */
+
+router.get("/me", verifyToken, getMe); // current user info
+router.get("/", verifyToken, verifyAdmin, getUsers); // admin get all users
+router.patch("/:id/role", verifyToken, verifyAdmin, updateUserRole); // admin update role
 
 export default router;
