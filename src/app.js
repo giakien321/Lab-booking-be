@@ -11,8 +11,18 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://your-admin-fe.vercel.app",
+];
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  credentials: true,
+}));
 app.use(express.json());
 
 // Swagger setup
