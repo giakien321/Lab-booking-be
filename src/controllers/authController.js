@@ -2,14 +2,8 @@ import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import User from "../models/userModel.js";
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client();
 
-const validAudiences = [
-    process.env.GOOGLE_CLIENT_ID, 
-    "407408718192.apps.googleusercontent.com" 
-];
-
-// Generate access and refresh tokens
 const generateTokens = (user) => {
     const payload = { id: user._id, email: user.email, role: user.role };
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -17,22 +11,22 @@ const generateTokens = (user) => {
     return { accessToken, refreshToken };
 };
 
-// Google Login Controller
 export const googleLogin = async (req, res) => {
     try {
         const { token } = req.body;
 
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: validAudiences,
-        });
+        if (!token) {
+            return res.status(400).json({ message: "Missing Google token" });
+        }
 
-        const { sub, name, email, picture, hd } = ticket.getPayload();
+        const ticket = await client.verifyIdToken({ idToken: token });
+
+        const { sub, name, email, picture } = ticket.getPayload();
 
         let user = await User.findOne({ email });
 
         if (!user) {
-            // Assign role automatically based on domain
+
             const role = email.includes("fpt.edu.vn") ? "student" : "admin";
 
             user = await User.create({
@@ -52,13 +46,16 @@ export const googleLogin = async (req, res) => {
             accessToken,
             refreshToken,
         });
+
     } catch (error) {
         console.error("Google login failed:", error);
-        res.status(400).json({ message: "Google login failed", error: error.message });
+        res.status(400).json({
+            message: "Google login failed",
+            error: error.message,
+        });
     }
 };
 
-// Refresh token
 export const refreshToken = (req, res) => {
     const { token } = req.body;
     if (!token) return res.status(401).json({ message: "Missing refresh token" });
