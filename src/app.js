@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoutes.js";
 import labRoutes from "./routes/labRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import studentRoutes from "./routes/studentRoutes.js";
 
 const app = express();
 
@@ -61,6 +62,7 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/labs", labRoutes);
 app.use("/api/v1/bookings", bookingRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/students", studentRoutes);
 
 // Default redirect
 app.get("/", (req, res) => {
