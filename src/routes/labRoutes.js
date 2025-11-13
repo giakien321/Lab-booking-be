@@ -21,7 +21,7 @@ const router = express.Router();
  * @swagger
  * /api/v1/labs:
  *   get:
- *     summary: Get all labs
+ *     summary: Get a ll labs
  *     tags: [Labs]
  *     security:
  *       - bearerAuth: []
@@ -102,6 +102,7 @@ const router = express.Router();
  *         - name
  *         - location
  *         - capacity
+ *         - subjectCode
  *       properties:
  *         _id:
  *           type: string
@@ -114,10 +115,16 @@ const router = express.Router();
  *         capacity:
  *           type: number
  *           example: 40
+ *         subjectCode:
+ *           type: string
+ *           example: PRM392
+ *         available:
+ *           type: boolean
+ *           example: true
  */
 
 router.get("/", verifyToken, getLabs);
-router.get("/:id", verifyToken, getLabById); // 👈 thêm mới để GET theo ID
+router.get("/:id", verifyToken, getLabById);
 router.post("/", verifyToken, verifyAdmin, createLab);
 router.put("/:id", verifyToken, verifyAdmin, updateLab);
 router.delete("/:id", verifyToken, verifyAdmin, deleteLab);
