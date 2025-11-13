@@ -150,3 +150,51 @@ export const cancelBooking = async (req, res) => {
     });
   }
 };
+/**
+ * Check booking status by ID
+ */
+export const getBookingStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const booking = await Booking.findById(id)
+      .populate("user", "name email")
+      .populate("lab", "name location subjectCode");
+    
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    
+    // Check if user is owner or admin
+    if (
+      booking.user._id.toString() !== req.user.id &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    res.status(200).json({
+      message: "Booking status retrieved successfully",
+      booking: {
+        id: booking._id,
+        lab: booking.lab,
+        subjectCode: booking.subjectCode,
+        date: booking.date,
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        status: booking.status,
+        isApproved: booking.status === "approved",
+        isPending: booking.status === "pending",
+        isRejected: booking.status === "rejected",
+        isCancelled: booking.status === "cancelled",
+        createdAt: booking.createdAt,
+        updatedAt: booking.updatedAt,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to check booking status",
+      error: error.message,
+    });
+  }
+};

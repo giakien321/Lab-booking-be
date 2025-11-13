@@ -5,6 +5,7 @@ import {
   getAllBookings,
   updateBookingStatus,
   cancelBooking,
+  getBookingStatus,
 } from "../controllers/bookingController.js";
 import { verifyToken, verifyAdmin } from "../middlewares/authMiddleware.js";
 
@@ -121,6 +122,50 @@ const router = express.Router();
  *           example: "11:00"
  */
 
+/**
+ * @swagger
+ * /api/v1/bookings/{id}/status-check:
+ *   get:
+ *     summary: Check if a booking is approved
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Booking ID
+ *     responses:
+ *       200:
+ *         description: Booking status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 booking:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     lab:
+ *                       type: object
+ *                     status:
+ *                       type: string
+ *                     isApproved:
+ *                       type: boolean
+ *                     isPending:
+ *                       type: boolean
+ *                     isRejected:
+ *                       type: boolean
+ *                     isCancelled:
+ *                       type: boolean
+ */
+
 router.post("/", verifyToken, createBooking);
 
 router.get("/", verifyToken, (req, res, next) => {
@@ -128,6 +173,7 @@ router.get("/", verifyToken, (req, res, next) => {
   return getMyBookings(req, res, next);
 });
 
+router.get("/:id/status-check", verifyToken, getBookingStatus);
 router.patch("/:id/status", verifyToken, verifyAdmin, updateBookingStatus);
 router.delete("/:id", verifyToken, cancelBooking);
 
